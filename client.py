@@ -1,9 +1,61 @@
+import pygame
+from customtkinter import *
 from pygame import *
 import socket
 import json
 from threading import Thread
+import time
+# Лаунчер
 
-# ---ПУГАМЕ НАЛАШТУВАННЯ ---
+class ConnectWindow(CTk):
+    def __init__(self):
+        super().__init__()
+
+        self.name = None
+        self.host = None
+        self.port = None
+
+        # --- Дизайн лаунчера ---
+        self.title('Ping-Pong Launcher')
+        self.geometry('350x450')
+        self.configure(fg_color="#222222")
+
+        CTkLabel(self, text='🎾 Ping-Pong Launcher', font=('Comic Sans MS', 24, 'bold'), text_color="#00FFAA").pack(pady=20)
+
+        CTkLabel(self, text='Введіть своє ім`я:', font=('Arial', 16)).pack(pady=(10,0))
+        self.name_entry = CTkEntry(self, placeholder_text='Ваше ім`я', height=40)
+        self.name_entry.pack(padx=20, fill='x')
+
+        CTkLabel(self, text='Хост сервера:', font=('Arial', 16)).pack(pady=(10,0))
+        self.host_entry = CTkEntry(self, placeholder_text='localhost', height=40)
+        self.host_entry.pack(padx=20, fill='x')
+
+        CTkLabel(self, text='Порт сервера:', font=('Arial', 16)).pack(pady=(10,0))
+        self.port_entry = CTkEntry(self, placeholder_text='8080', height=40)
+        self.port_entry.pack(padx=20, fill='x')
+
+        CTkButton(self, text='Грати', command=self.open_game, height=50, fg_color="#00FFAA", hover_color="#00CC88").pack(pady=20, padx=40, fill='x')
+        CTkButton(self, text='Вихід', command=self.destroy, height=40, fg_color="#FF5555", hover_color="#CC4444").pack(pady=10, padx=40, fill='x')
+
+    def open_game(self):
+        self.name = self.name_entry.get()
+        self.host = self.host_entry.get()
+        self.port = int(self.port_entry.get())
+        self.destroy()
+
+def connect_to_server(host, port):
+    while True:
+        try:
+            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client.connect((host, port))
+            buffer = ""
+            game_state = {}
+            my_id = int(client.recv(24).decode())
+            return my_id, game_state, buffer, client
+        except:
+            pass
+
+def run_game(name, host, port):
 WIDTH, HEIGHT = 800, 600
 init()
 screen = display.set_mode((WIDTH, HEIGHT))
